@@ -201,7 +201,7 @@ void RenderEngine::fillRegionWithColor(const Region& region, uint32_t height,
     Rect const* r = region.getArray(&c);
     Mesh mesh(Mesh::TRIANGLES, c*6, 2);
     Mesh::VertexArray<vec2> position(mesh.getPositionArray<vec2>());
-    for (size_t i=0 ; i<c ; i++, r++) {
+    for (size_t i=0 ; i<c ; ++i, ++r) {
         position[i*6 + 0].x = r->left;
         position[i*6 + 0].y = height - r->top;
         position[i*6 + 1].x = r->left;
@@ -293,7 +293,7 @@ static status_t selectConfigForAttribute(EGLDisplay dpy, EGLint const* attrs,
 
     if (n) {
         if (attribute != EGL_NONE) {
-            for (int i=0 ; i<n ; i++) {
+            for (int i=0 ; i<n ; ++i) {
                 EGLint value = 0;
                 eglGetConfigAttrib(dpy, configs[i], attribute, &value);
                 if (wanted == value) {

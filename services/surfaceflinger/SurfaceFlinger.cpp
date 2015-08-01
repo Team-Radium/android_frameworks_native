@@ -451,7 +451,7 @@ void SurfaceFlinger::init() {
             "couldn't create EGLContext");
 
     // initialize our non-virtual displays
-    for (size_t i=0 ; i<DisplayDevice::NUM_BUILTIN_DISPLAY_TYPES ; i++) {
+    for (size_t i=0 ; i<DisplayDevice::NUM_BUILTIN_DISPLAY_TYPES ; ++i) {
         DisplayDevice::DisplayType type((DisplayDevice::DisplayType)i);
         // set-up the displays that are already connected
         if (mHwc->isConnected(i) || type==DisplayDevice::DISPLAY_PRIMARY) {
@@ -976,7 +976,7 @@ void SurfaceFlinger::doDebugFlashRegions()
         return;
 
     const bool repaintEverything = mRepaintEverything;
-    for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
+    for (size_t dpy=0 ; dpy<mDisplays.size() ; ++dpy) {
         const sp<DisplayDevice>& hw(mDisplays[dpy]);
 
         if (hw->isDisplayOn()) {
@@ -1039,7 +1039,7 @@ void SurfaceFlinger::preComposition()
     bool needExtraInvalidate = false;
     const LayerVector& layers(mDrawingState.layersSortedByZ);
     const size_t count = layers.size();
-    for (size_t i=0 ; i<count ; i++) {
+    for (size_t i=0 ; i<count ; ++i) {
         if (layers[i]->onPreComposition()) {
             needExtraInvalidate = true;
         }
@@ -1053,7 +1053,7 @@ void SurfaceFlinger::postComposition()
 {
     const LayerVector& layers(mDrawingState.layersSortedByZ);
     const size_t count = layers.size();
-    for (size_t i=0 ; i<count ; i++) {
+    for (size_t i=0 ; i<count ; ++i) {
         layers[i]->onPostComposition();
     }
 
@@ -1103,7 +1103,7 @@ void SurfaceFlinger::rebuildLayerStacks() {
         invalidateHwcGeometry();
 
         const LayerVector& layers(mDrawingState.layersSortedByZ);
-        for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
+        for (size_t dpy=0 ; dpy<mDisplays.size() ; ++dpy) {
             Region opaqueRegion;
             Region dirtyRegion;
             Vector< sp<Layer> > layersSortedByZ;
@@ -1116,7 +1116,7 @@ void SurfaceFlinger::rebuildLayerStacks() {
                         hw->getLayerStack(), dirtyRegion, opaqueRegion);
 
                 const size_t count = layers.size();
-                for (size_t i=0 ; i<count ; i++) {
+                for (size_t i=0 ; i<count ; ++i) {
                     const sp<Layer>& layer(layers[i]);
                     const Layer::State& s(layer->getDrawingState());
                     Region drawRegion(tr.transform(
@@ -1136,7 +1136,7 @@ void SurfaceFlinger::rebuildLayerStacks() {
 }
 
 void SurfaceFlinger::setUpHWComposer() {
-    for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
+    for (size_t dpy=0 ; dpy<mDisplays.size() ; ++dpy) {
         bool dirty = !mDisplays[dpy]->getDirtyRegion(false).isEmpty();
         bool empty = mDisplays[dpy]->getVisibleLayersSortedByZ().size() == 0;
         bool wasEmpty = !mDisplays[dpy]->lastCompositionHadVisibleLayers;
@@ -1170,7 +1170,7 @@ void SurfaceFlinger::setUpHWComposer() {
         // build the h/w work list
         if (CC_UNLIKELY(mHwWorkListDirty)) {
             mHwWorkListDirty = false;
-            for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
+            for (size_t dpy=0 ; dpy<mDisplays.size() ; ++dpy) {
                 sp<const DisplayDevice> hw(mDisplays[dpy]);
                 const int32_t id = hw->getHwcDisplayId();
                 if (id >= 0) {
@@ -1193,7 +1193,7 @@ void SurfaceFlinger::setUpHWComposer() {
         }
 
         // set the per-frame data
-        for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
+        for (size_t dpy=0 ; dpy<mDisplays.size() ; ++dpy) {
             sp<const DisplayDevice> hw(mDisplays[dpy]);
             const int32_t id = hw->getHwcDisplayId();
             if (id >= 0) {
@@ -1242,7 +1242,7 @@ void SurfaceFlinger::setUpHWComposer() {
                         const KeyedVector<wp<IBinder>, DisplayDeviceState>&
                                                 draw(mDrawingState.displays);
                         size_t dc = draw.size();
-                        for (size_t i=0 ; i<dc ; i++) {
+                        for (size_t i=0 ; i<dc ; ++i) {
                             if (draw[i].isMainDisplay()) {
                                  // Pass the current orientation to HWC
                                  hwc.eventControl(HWC_DISPLAY_PRIMARY,
@@ -1261,7 +1261,7 @@ void SurfaceFlinger::setUpHWComposer() {
         }
 
         // If possible, attempt to use the cursor overlay on each display.
-        for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
+        for (size_t dpy=0 ; dpy<mDisplays.size() ; ++dpy) {
             sp<const DisplayDevice> hw(mDisplays[dpy]);
             const int32_t id = hw->getHwcDisplayId();
             if (id >= 0) {
@@ -1283,7 +1283,7 @@ void SurfaceFlinger::setUpHWComposer() {
         status_t err = hwc.prepare();
         ALOGE_IF(err, "HWComposer::prepare failed (%s)", strerror(-err));
 
-        for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
+        for (size_t dpy=0 ; dpy<mDisplays.size() ; ++dpy) {
             sp<const DisplayDevice> hw(mDisplays[dpy]);
             hw->prepareFrame(hwc);
         }
@@ -1293,7 +1293,7 @@ void SurfaceFlinger::setUpHWComposer() {
 void SurfaceFlinger::doComposition() {
     ATRACE_CALL();
     const bool repaintEverything = android_atomic_and(0, &mRepaintEverything);
-    for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
+    for (size_t dpy=0 ; dpy<mDisplays.size() ; ++dpy) {
         const sp<DisplayDevice>& hw(mDisplays[dpy]);
         if (hw->isDisplayOn()) {
             // transform the dirty region into this screen's coordinate space
@@ -1338,7 +1338,7 @@ void SurfaceFlinger::postFramebuffer()
     // dequeueBuffer().
     getDefaultDisplayDevice()->makeCurrent(mEGLDisplay, mEGLContext);
 
-    for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
+    for (size_t dpy=0 ; dpy<mDisplays.size() ; ++dpy) {
         sp<const DisplayDevice> hw(mDisplays[dpy]);
         const Vector< sp<Layer> >& currentLayers(hw->getVisibleLayersSortedByZ());
         hw->onSwapBuffersCompleted(hwc);
@@ -1351,7 +1351,7 @@ void SurfaceFlinger::postFramebuffer()
                 currentLayers[i]->onLayerDisplayed(hw, &*cur);
             }
         } else {
-            for (size_t i = 0; i < count; i++) {
+            for (size_t i = 0; i < count; ++i) {
                 currentLayers[i]->onLayerDisplayed(hw, NULL);
             }
         }
@@ -1508,7 +1508,7 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
      */
 
     if (transactionFlags & eTraversalNeeded) {
-        for (size_t i=0 ; i<count ; i++) {
+        for (size_t i=0 ; i<count ; ++i) {
             const sp<Layer>& layer(currentLayers[i]);
             uint32_t trFlags = layer->getTransactionFlags(eTransactionNeeded);
             if (!trFlags) continue;
@@ -1538,7 +1538,7 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
             // (ie: in drawing state but not in current state)
             // also handle displays that changed
             // (ie: displays that are in both lists)
-            for (size_t i=0 ; i<dc ; i++) {
+            for (size_t i=0 ; i<dc ; ++i) {
                 const ssize_t j = curr.indexOfKey(draw.keyAt(i));
                 if (j < 0) {
                     // in drawing state but not in current state
@@ -1629,7 +1629,7 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
 
             // find displays that were added
             // (ie: in current state but not in drawing state)
-            for (size_t i=0 ; i<cc ; i++) {
+            for (size_t i=0 ; i<cc ; ++i) {
                 if (draw.indexOfKey(curr.keyAt(i)) < 0) {
                     const DisplayDeviceState& state(curr[i]);
 
@@ -1719,7 +1719,7 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
         //
         sp<const DisplayDevice> disp;
         uint32_t currentlayerStack = 0;
-        for (size_t i=0; i<count; i++) {
+        for (size_t i=0; i<count; ++i) {
             // NOTE: we rely on the fact that layers are sorted by
             // layerStack first (so we don't have to traverse the list
             // of displays for every layer).
@@ -1731,7 +1731,7 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
                 // (more than one display) if so, pick the default display,
                 // if not, pick the only display it's on.
                 disp.clear();
-                for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
+                for (size_t dpy=0 ; dpy<mDisplays.size() ; ++dpy) {
                     sp<const DisplayDevice> hw(mDisplays[dpy]);
                     if (hw->getLayerStack() == currentlayerStack) {
                         if (disp == NULL) {
@@ -1773,7 +1773,7 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
         mLayersRemoved = false;
         mVisibleRegionsDirty = true;
         const size_t count = layers.size();
-        for (size_t i=0 ; i<count ; i++) {
+        for (size_t i=0 ; i<count ; ++i) {
             const sp<Layer>& layer(layers[i]);
             if (currentLayers.indexOf(layer) < 0) {
                 // this layer is not visible anymore
@@ -1796,7 +1796,7 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
 void SurfaceFlinger::updateCursorAsync()
 {
     HWComposer& hwc(getHwComposer());
-    for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
+    for (size_t dpy=0 ; dpy<mDisplays.size() ; ++dpy) {
         sp<const DisplayDevice> hw(mDisplays[dpy]);
         const int32_t id = hw->getHwcDisplayId();
         if (id < 0) {
@@ -2030,7 +2030,7 @@ void SurfaceFlinger::computeVisibleRegions(size_t dpy,
 
 void SurfaceFlinger::invalidateLayerStack(uint32_t layerStack,
         const Region& dirty) {
-    for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
+    for (size_t dpy=0 ; dpy<mDisplays.size() ; ++dpy) {
         const sp<DisplayDevice>& hw(mDisplays[dpy]);
         if (hw->getLayerStack() == layerStack) {
             hw->dirtyRegion.orSelf(dirty);
@@ -2056,7 +2056,7 @@ bool SurfaceFlinger::handlePageFlip()
     // Display is now waiting on Layer 1's frame, which is behind layer 0's
     // second frame. But layer 0's second frame could be waiting on display.
     Vector<Layer*> layersWithQueuedFrames;
-    for (size_t i = 0, count = layers.size(); i<count ; i++) {
+    for (size_t i = 0, count = layers.size(); i<count ; ++i) {
         const sp<Layer>& layer(layers[i]);
         if (layer->hasQueuedFrame()) {
             frameQueued = true;
@@ -2065,7 +2065,7 @@ bool SurfaceFlinger::handlePageFlip()
             }
         }
     }
-    for (size_t i = 0, count = layersWithQueuedFrames.size() ; i<count ; i++) {
+    for (size_t i = 0, count = layersWithQueuedFrames.size() ; i<count ; ++i) {
         Layer* layer = layersWithQueuedFrames[i];
         const Region dirty(layer->latchBuffer(visibleRegions));
         const Layer::State& s(layer->getDrawingState());
@@ -2439,7 +2439,7 @@ void SurfaceFlinger::setTransactionState(
     // Delay the display projection transaction by 50ms only when the disable
     // external rotation animation feature is enabled
     if(mDisableExtAnimation) {
-        for (size_t i=0 ; i<count ; i++) {
+        for (size_t i=0 ; i<count ; ++i) {
             const DisplayState& s(displays[i]);
             if((mDisplays.indexOfKey(s.token) >= 0) && (s.token !=
                     mBuiltinDisplays[DisplayDevice::DISPLAY_PRIMARY])) {
@@ -2476,13 +2476,13 @@ void SurfaceFlinger::setTransactionState(
         }
     }
 
-    for (size_t i=0 ; i<count ; i++) {
+    for (size_t i=0 ; i<count ; ++i) {
         const DisplayState& s(displays[i]);
         transactionFlags |= setDisplayStateLocked(s);
     }
 
     count = state.size();
-    for (size_t i=0 ; i<count ; i++) {
+    for (size_t i=0 ; i<count ; ++i) {
         const ComposerState& s(state[i]);
         // Here we need to check that the interface we're given is indeed
         // one of our own. A malicious client could give us a NULL
@@ -2982,7 +2982,7 @@ void SurfaceFlinger::listLayersLocked(const Vector<String16>& /* args */,
 {
     const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
     const size_t count = currentLayers.size();
-    for (size_t i=0 ; i<count ; i++) {
+    for (size_t i=0 ; i<count ; ++i) {
         const sp<Layer>& layer(currentLayers[i]);
         result.appendFormat("%s\n", layer->getName().string());
     }
@@ -3007,7 +3007,7 @@ void SurfaceFlinger::dumpStatsLocked(const Vector<String16>& args, size_t& index
         bool found = false;
         const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
         const size_t count = currentLayers.size();
-        for (size_t i=0 ; i<count ; i++) {
+        for (size_t i=0 ; i<count ; ++i) {
             const sp<Layer>& layer(currentLayers[i]);
             if (name == layer->getName()) {
                 found = true;
@@ -3031,7 +3031,7 @@ void SurfaceFlinger::clearStatsLocked(const Vector<String16>& args, size_t& inde
 
     const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
     const size_t count = currentLayers.size();
-    for (size_t i=0 ; i<count ; i++) {
+    for (size_t i=0 ; i<count ; ++i) {
         const sp<Layer>& layer(currentLayers[i]);
         if (name.isEmpty() || (name == layer->getName())) {
             layer->clearFrameStats();
@@ -3046,7 +3046,7 @@ void SurfaceFlinger::clearStatsLocked(const Vector<String16>& args, size_t& inde
 void SurfaceFlinger::logFrameStats() {
     const LayerVector& drawingLayers = mDrawingState.layersSortedByZ;
     const size_t count = drawingLayers.size();
-    for (size_t i=0 ; i<count ; i++) {
+    for (size_t i=0 ; i<count ; ++i) {
         const sp<Layer>& layer(drawingLayers[i]);
         layer->logFrameStats();
     }
@@ -3216,7 +3216,7 @@ const Vector< sp<Layer> >&
 SurfaceFlinger::getLayerSortedByZForHwcDisplay(int id) {
     // Note: mStateLock is held here
     wp<IBinder> dpy;
-    for (size_t i=0 ; i<mDisplays.size() ; i++) {
+    for (size_t i=0 ; i<mDisplays.size() ; ++i) {
         if (mDisplays.valueAt(i)->getHwcDisplayId() == id) {
             dpy = mDisplays.keyAt(i);
             break;
@@ -3382,8 +3382,8 @@ status_t SurfaceFlinger::onTransact(
                     // color matrix is sent as mat3 matrix followed by vec3
                     // offset, then packed into a mat4 where the last row is
                     // the offset and extra values are 0
-                    for (size_t i = 0 ; i < 4; i++) {
-                      for (size_t j = 0; j < 4; j++) {
+                    for (size_t i = 0 ; i < 4; ++i) {
+                      for (size_t j = 0; j < 4; ++j) {
                           mColorMatrix[i][j] = data.readFloat();
                       }
                     }
@@ -3870,9 +3870,9 @@ status_t SurfaceFlinger::captureScreenImplLocked(
 void SurfaceFlinger::checkScreenshot(size_t w, size_t s, size_t h, void const* vaddr,
         const sp<const DisplayDevice>& hw, uint32_t minLayerZ, uint32_t maxLayerZ) {
     if (DEBUG_SCREENSHOTS) {
-        for (size_t y=0 ; y<h ; y++) {
+        for (size_t y=0 ; y<h ; ++y) {
             uint32_t const * p = (uint32_t const *)vaddr + y*s;
-            for (size_t x=0 ; x<w ; x++) {
+            for (size_t x=0 ; x<w ; ++x) {
                 if (p[x] != 0xFF000000) return;
             }
         }

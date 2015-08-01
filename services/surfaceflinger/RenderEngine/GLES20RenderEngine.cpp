@@ -68,7 +68,7 @@ GLES20RenderEngine::GLES20RenderEngine() :
 }
 
 GLES20RenderEngine::~GLES20RenderEngine() {
-    for (size_t i = 0; i < mGroupCache.size(); i++) {
+    for (size_t i = 0; i < mGroupCache.size(); ++i) {
         Key key = mGroupCache.keyAt(i);
         Group tmpGroup = mGroupCache.valueFor(key);
         if (tmpGroup.isValid()) {

@@ -370,7 +370,7 @@ status_t VirtualDisplaySurface::dequeueBuffer(Source source,
     }
 
     if (result & RELEASE_ALL_BUFFERS) {
-        for (uint32_t i = 0; i < BufferQueue::NUM_BUFFER_SLOTS; i++) {
+        for (uint32_t i = 0; i < BufferQueue::NUM_BUFFER_SLOTS; ++i) {
             if ((mProducerSlotSource & (1ULL << i)) == sourceBit)
                 mProducerBuffers[i].clear();
         }

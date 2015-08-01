@@ -93,11 +93,11 @@ HWComposer::HWComposer(
       mDebugForceFakeVSync(false),
       mVDSEnabled(false)
 {
-    for (size_t i =0 ; i<MAX_HWC_DISPLAYS ; i++) {
+    for (size_t i =0 ; i<MAX_HWC_DISPLAYS ; ++i) {
         mLists[i] = 0;
     }
 
-    for (size_t i=0 ; i<HWC_NUM_PHYSICAL_DISPLAY_TYPES ; i++) {
+    for (size_t i=0 ; i<HWC_NUM_PHYSICAL_DISPLAY_TYPES ; ++i) {
         mLastHwVSync[i] = 0;
         mVSyncCounts[i] = 0;
     }
@@ -129,7 +129,7 @@ HWComposer::HWComposer(
     }
 
     // these display IDs are always reserved
-    for (size_t i=0 ; i<NUM_BUILTIN_DISPLAYS ; i++) {
+    for (size_t i=0 ; i<NUM_BUILTIN_DISPLAYS ; ++i) {
         mAllocatedDisplayIDs.markBit(i);
     }
 
@@ -187,7 +187,7 @@ HWComposer::HWComposer(
         disp.currentConfig = 0;
     } else if (mHwc) {
         // here we're guaranteed to have at least HWC 1.1
-        for (size_t i =0 ; i<NUM_BUILTIN_DISPLAYS ; i++) {
+        for (size_t i =0 ; i<NUM_BUILTIN_DISPLAYS ; ++i) {
             queryDisplayProperties(i);
         }
     }
@@ -397,7 +397,7 @@ status_t HWComposer::queryDisplayProperties(int disp) {
         }
 
         DisplayConfig config = DisplayConfig();
-        for (size_t i = 0; i < NUM_DISPLAY_ATTRIBUTES - 1; i++) {
+        for (size_t i = 0; i < NUM_DISPLAY_ATTRIBUTES - 1; ++i) {
             switch (DISPLAY_ATTRIBUTES[i]) {
                 case HWC_DISPLAY_VSYNC_PERIOD:
                     config.refresh = nsecs_t(values[i]);
@@ -689,7 +689,7 @@ status_t HWComposer::setFramebufferTarget(int32_t id,
 
 status_t HWComposer::prepare() {
     Mutex::Autolock _l(mDrawLock);
-    for (size_t i=0 ; i<mNumDisplays ; i++) {
+    for (size_t i=0 ; i<mNumDisplays ; ++i) {
         DisplayData& disp(mDisplayData[i]);
         if (disp.framebufferTarget) {
             // make sure to reset the type to HWC_FRAMEBUFFER_TARGET
@@ -730,7 +730,7 @@ status_t HWComposer::prepare() {
         // If there are no window layers, we treat the display has having FB
         // composition, because SurfaceFlinger will use GLES to draw the
         // wormhole region.
-        for (size_t i=0 ; i<mNumDisplays ; i++) {
+        for (size_t i=0 ; i<mNumDisplays ; ++i) {
             DisplayData& disp(mDisplayData[i]);
             disp.hasFbComp = false;
             disp.hasOvComp = false;
@@ -745,7 +745,7 @@ status_t HWComposer::prepare() {
                current_comp_map[i].reset();
                current_comp_map[i].count = disp.list->numHwLayers-1;
 #endif
-                for (size_t j=0 ; j<disp.list->numHwLayers ; j++) {
+                for (size_t j=0 ; j<disp.list->numHwLayers ; ++j) {
                     hwc_layer_1_t& l = disp.list->hwLayers[j];
 
                     //ALOGD("prepare: %d, type=%d, handle=%p",
@@ -836,7 +836,7 @@ status_t HWComposer::commit() {
             mLists[0]->sur = eglGetCurrentSurface(EGL_DRAW);
         }
 
-        for (size_t i=VIRTUAL_DISPLAY_ID_BASE; i<mNumDisplays; i++) {
+        for (size_t i=VIRTUAL_DISPLAY_ID_BASE; i<mNumDisplays; ++i) {
             DisplayData& disp(mDisplayData[i]);
             if (disp.outbufHandle) {
                 mLists[i]->outbuf = disp.outbufHandle;
@@ -847,7 +847,7 @@ status_t HWComposer::commit() {
 
         err = mHwc->set(mHwc, mNumDisplays, mLists);
 
-        for (size_t i=0 ; i<mNumDisplays ; i++) {
+        for (size_t i=0 ; i<mNumDisplays ; ++i) {
             DisplayData& disp(mDisplayData[i]);
             disp.lastDisplayFence = disp.lastRetireFence;
             disp.lastRetireFence = Fence::NO_FENCE;
@@ -1254,7 +1254,7 @@ void HWComposer::dump(String8& result) const {
     if (mHwc) {
         result.appendFormat("Hardware Composer state (version %08x):\n", hwcApiVersion(mHwc));
         result.appendFormat("  mDebugForceFakeVSync=%d\n", mDebugForceFakeVSync);
-        for (size_t i=0 ; i<mNumDisplays ; i++) {
+        for (size_t i=0 ; i<mNumDisplays ; ++i) {
             const DisplayData& disp(mDisplayData[i]);
             if (!disp.connected)
                 continue;
@@ -1286,7 +1286,7 @@ void HWComposer::dump(String8& result) const {
                         "    type   |  handle  | hint | flag | tr | blnd |  format     |     source crop(l,t,r,b)       |           frame        |      dirtyRect         |  name \n"
                         "------------+----------+----------+----------+----+-------+----------+-----------------------------------+---------------------------+-------------------\n");
                 //      " __________ | ________ | ________ | ________ | __ | _____ | ________ | [_____._,_____._,_____._,_____._] | [_____,_____,_____,_____] | [_____,_____,_____,_____] |
-                for (size_t i=0 ; i<disp.list->numHwLayers ; i++) {
+                for (size_t i=0 ; i<disp.list->numHwLayers ; ++i) {
                     const hwc_layer_1_t&l = disp.list->hwLayers[i];
                     int32_t format = -1;
                     String8 name("unknown");
@@ -1443,7 +1443,7 @@ bool HWComposer::areVisibleRegionsOverlapping(int32_t id ) {
     size_t count = currentLayers.size();
     Region consolidatedVisibleRegion;
 
-    for (size_t i=0; i<count; i++) {
+    for (size_t i=0; i<count; ++i) {
         //If there are any overlapping visible regions, disable GPUTileRect
         if(!consolidatedVisibleRegion.intersect(
                  currentLayers[i]->visibleRegion).isEmpty()){
@@ -1464,7 +1464,7 @@ bool HWComposer::canHandleOverlapArea(int32_t id, Rect unionDr) {
               (fbDisplayFrame.bottom - fbDisplayFrame.top));
 
     //Compute sum of the Areas of FB layers intersecting with Union Dirty Rect
-    for (size_t i=0; i<disp.list->numHwLayers-1; i++) {
+    for (size_t i=0; i<disp.list->numHwLayers-1; ++i) {
         hwc_layer_1_t& layer = disp.list->hwLayers[i];
         if(layer.compositionType != HWC_FRAMEBUFFER)
            continue;
@@ -1489,7 +1489,7 @@ bool HWComposer::needsScaling(int32_t id) {
     if (!mHwc || uint32_t(id)>31 || !mAllocatedDisplayIDs.hasBit(id))
         return false;
     DisplayData& disp(mDisplayData[id]);
-    for (size_t i=0; i<disp.list->numHwLayers-1; i++) {
+    for (size_t i=0; i<disp.list->numHwLayers-1; ++i) {
         int dst_w, dst_h, src_w, src_h;
         hwc_layer_1_t& layer = disp.list->hwLayers[i];
         hwc_rect_t displayFrame  = layer.displayFrame;
@@ -1522,7 +1522,7 @@ void HWComposer::computeUnionDirtyRect(int32_t id, Rect& unionDirtyRect) {
     DisplayData& disp(mDisplayData[id]);
 
     // Find UnionDr of all layers
-    for (size_t i=0; i<count; i++) {
+    for (size_t i=0; i<count; ++i) {
         hwc_layer_1_t& l = disp.list->hwLayers[i];
         Rect dr;
         dr.clear();

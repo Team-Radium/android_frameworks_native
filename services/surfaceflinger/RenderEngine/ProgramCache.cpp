@@ -52,7 +52,7 @@ public:
     }
 
     friend Formatter& operator << (Formatter& out, const char* in) {
-        for (int i=0 ; i<out.mIndent ; i++) {
+        for (int i=0 ; i<out.mIndent ; ++i) {
             out.mString.append("    ");
         }
         out.mString.append(in);
@@ -96,7 +96,7 @@ void ProgramCache::primeCache() {
     // leaving off the experimental color matrix mask options.
 
     nsecs_t timeBefore = systemTime();
-    for (uint32_t keyVal = 0; keyVal <= keyMask; keyVal++) {
+    for (uint32_t keyVal = 0; keyVal <= keyMask; ++keyVal) {
         Key shaderKey;
         shaderKey.set(keyMask, keyVal);
         uint32_t tex = shaderKey.getTextureTarget();
